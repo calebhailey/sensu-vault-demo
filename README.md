@@ -1,11 +1,15 @@
 
+# Sensu Vault Demo 
+
+Docker Compose file and config files for the Sensu Vault demo webinar.
+
 ## Prerequisites 
 
-- Download & install Docker & `docker-compose` 
-- Download & install the Sensu CLI (`sensuctl`) 
+- Download & install Docker & `docker-compose`; see: https://docs.docker.com/compose/install/
+- Download & install the Sensu CLI (`sensuctl`); see: https://sensu.io/downloads 
   _NOTE: we'll run the Sensu Go Server in a Docker container, but you'll need
   the `sensuctl` CLI to interact with Sensu._
-- Download & install the Vault CLI (`vault`)
+- Download & install the Vault CLI (`vault`); see: https://www.vaultproject.io/docs/install 
   _NOTE: we'll run the Vault server in a Docker container, but you'll need the
   `vault` CLI to interact with the Vault server._
 
@@ -14,7 +18,7 @@
 1. Startup the demo environment 
 
    ```
-   $ sudo docker-compose up -d -p webinar
+   $ sudo docker-compose up -d
    Creating network "webinar_default" with the default driver
    Creating volume "webinar_sensu-backend-data" with local driver
    Pulling sensu-backend (sensu/sensu:5.20.1)...
@@ -49,12 +53,10 @@
 3. Configure the `vault` CLI to connect to the Vault server
 
    ```
-   export $(cat .env | grep VAULT_DEV_ROOT_TOKEN_ID)
-   echo "${VAULT_DEV_ROOT_TOKEN_ID}" > $HOME/.vault-token
-   export VAULT_ADDR=http://127.0.0.1:8200
-   vault status
-   vault audit enable file file_path=stdout
-   
+   $ export $(cat .env | grep VAULT_DEV_ROOT_TOKEN_ID)
+   $ echo "${VAULT_DEV_ROOT_TOKEN_ID}" > $HOME/.vault-token
+   $ export VAULT_ADDR=http://127.0.0.1:8200
+   $ vault status
    Key             Value
    ---             -----
    Seal Type       shamir
@@ -107,11 +109,26 @@
 
 5. Create a event that should alert in Slack 
 
+   First, create a Sensu API Key using `sensuctl`:
+
    ```
    $ sensuctl user create webinar --password $(uuid)
+   Created
    $ sensuctl user add-group webinar cluster-admins
+   Updated
    $ sensuctl api-key grant webinar 
-   $ export SENSU_API_KEY=
+   Created: /api/core/v2/apikeys/ad3a7c47-6485-48af-a7e1-c9fc4a8a709e
+   ```
+
+
+   Then, use the API key to create an event via the Sensu API.
+
+   _NOTE: you'll the UUID portion of the last command output (i.e. the text 
+   that comes after `/api/core/v2/apikeys/`) to create your `SENSU_API_KEY` 
+   environment variable (as shown below)._
+
+   ```
+   $ export SENSU_API_KEY=ad3a7c47-6485-48af-a7e1-c9fc4a8a709e
    $ curl -i -XPOST -H "Authorization: Key $SENSU_API_KEY" \
      -H "Content-Type: application/json" \
      -d '{"entity":{"metadata":{"name":"i-424242"}},"check":{"metadata":{"name":"my-app"},"status":2,"output":"ERROR: failed to connect to database.","handlers":["slack"]}}' \
@@ -141,4 +158,18 @@
 
   ```
   $ sensuctl dump secrets/v1.Provider 
+  ```
+
+- Enable Vault Audit logging (to stdout)
+
+  ```
+  $ vault audit enable file file_path=stdout
+  Success! Enabled the file audit device at: file/
+  ``` 
+
+  You should now be able to view Vault audit logs with the `docker logs`
+  command: 
+  
+  ```
+  $ sudo docker logs -f webinar_vault_1
   ```
