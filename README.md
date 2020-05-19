@@ -72,8 +72,8 @@ Docker Compose file and config files for the Sensu Vault demo webinar.
 
 4. Create some Vault secrets!
 
-   > **NOTE:** please modify `slack-secrets.json` with a valid Slack Webhook 
-     URL. 
+   > **NOTE:** please rename `slack-secrets.json.example` to `slack-secrets.json` 
+     and update the contents of the file with a valid Slack Webhook URL. 
 
    ```
    $ vault kv put secret/sensu/slack @slack-secrets.json 
