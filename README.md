@@ -76,7 +76,7 @@ Docker Compose file and config files for the Sensu Vault demo webinar.
      and update the contents of the file with a valid Slack Webhook URL. 
 
    ```
-   $ vault kv put secret/sensu/slack @slack-secrets.json 
+   $ vault kv put secret/sensu/slack @vault/slack-secrets.json 
    Key              Value
    ---              -----
    created_time     2020-05-18T22:47:17.765882188Z
@@ -104,8 +104,8 @@ Docker Compose file and config files for the Sensu Vault demo webinar.
 
    ```
    $ ll
-   $ sensuctl create -f vault.yaml
-   $ sensuctl create -f slack.yaml 
+   $ sensuctl create -f sensu/vault.yaml
+   $ sensuctl create -f sensu/slack.yaml 
    $ sensuctl handler list 
    $ sensuctl secret list 
    ```
@@ -134,10 +134,9 @@ Docker Compose file and config files for the Sensu Vault demo webinar.
    $ export SENSU_API_KEY=ad3a7c47-6485-48af-a7e1-c9fc4a8a709e
    $ curl -i -XPOST -H "Authorization: Key $SENSU_API_KEY" \
      -H "Content-Type: application/json" \
-     -d '{"entity":{"metadata":{"name":"i-424242"}},"check":{"metadata":{"name":"my-app"},"status":2,"output":"ERROR: failed to connect to database.","handlers":["slack"]}}' \
+     -d '{"entity":{"metadata":{"name":"i-424242"}},"check":{"metadata":{"name":"my-app"},"status":2,"output":"ERROR: failed to connect to database.","handlers":["slack","pagerduty"]}}' \
      http://127.0.0.1:8080/api/core/v2/namespaces/default/events
    ```
-
 
 ## Troubleshooting 
 
