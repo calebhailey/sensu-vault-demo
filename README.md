@@ -138,6 +138,15 @@ Docker Compose file and config files for the Sensu Vault demo webinar.
      http://127.0.0.1:8080/api/core/v2/namespaces/default/events
    ```
 
+6. Resolve the alert 
+
+   ```
+   $ curl -i -XPOST -H "Authorization: Key $SENSU_API_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{"entity":{"metadata":{"name":"i-424242"}},"check":{"metadata":{"name":"my-app"},"status":0,"output":"Database connection restored.","handlers":["slack","pagerduty"]}}' \
+     http://127.0.0.1:8080/api/core/v2/namespaces/default/events
+   ```
+
 ## Troubleshooting 
 
 - Reset the demo environment 
