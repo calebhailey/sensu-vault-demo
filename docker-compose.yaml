@@ -1,0 +1,31 @@
+---
+  version: "3"
+  services:
+    sensu-backend:
+      image: sensu/sensu:5.20.1
+      ports:
+      - 3000:3000
+      - 8080:8080
+      - 8081:8081
+      environment:
+      - SENSU_BACKEND_CLUSTER_ADMIN_USERNAME=${SENSU_BACKEND_CLUSTER_ADMIN_USERNAME}
+      - SENSU_BACKEND_CLUSTER_ADMIN_PASSWORD=${SENSU_BACKEND_CLUSTER_ADMIN_USERNAME}
+      volumes:
+      - "sensu-backend-data:/var/lib/sensu"
+      command: >-
+        sensu-backend start 
+        --debug --log-level debug
+
+    vault:
+      image: vault:latest
+      ports: 
+      - 8200:8200
+      environment:
+      - VAULT_DEV_ROOT_TOKEN_ID=${VAULT_DEV_ROOT_TOKEN_ID}
+      - VAULT_DEV_LISTEN_ADDRESS=${VAULT_DEV_LISTEN_ADDRESS}
+      command: >-
+        vault server -dev -log-level debug 
+  
+  volumes:
+    sensu-backend-data:
+      driver: local
